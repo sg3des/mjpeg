@@ -1,4 +1,4 @@
-package main
+package mjpeg
 
 import (
 	"fmt"
@@ -14,21 +14,21 @@ const (
 		"Content-Length: %d\r\n\r\n"
 )
 
-// Stream represents a single video feed.
-type Stream struct {
+// MJPEG represents a single video feed.
+type MJPEG struct {
 	clients map[chan []byte]bool
 	sync.RWMutex
 }
 
 // NewStream initializes and returns a new Stream.
-func NewStream() *Stream {
-	return &Stream{
+func New() *MJPEG {
+	return &MJPEG{
 		clients: make(map[chan []byte]bool),
 	}
 }
 
 // ServeHTTP responds to HTTP requests with the MJPEG stream, implementing the http.Handler interface.
-func (s *Stream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *MJPEG) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "multipart/x-mixed-replace;boundary="+boundary)
 
 	c := make(chan []byte)
@@ -52,7 +52,7 @@ func (s *Stream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	close(c)
 }
 
-func (s *Stream) UpdateFrame(img []byte) {
+func (s *MJPEG) UpdateFrame(img []byte) {
 	s.RLock()
 	for c := range s.clients {
 		select {
